@@ -3,14 +3,36 @@ import './App.css';
 import Header from './Header';
 import Todos from './Todos';
 import Footer from './Footer';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import AddTodo from './AddTodo';
+import About from './About';
+import{BrowserRouter as Router,Switch,Route} from 'react-router-dom';
 
 export default function App() {
+  let initTodo;
+  if(  localStorage.getItem("todos")===null){
+      initTodo = [];
+    }
+  else{
+    initTodo = JSON.parse(localStorage.getItem("todos"));
+  }
   
+  
+  const onDelete =(todo)=>{
+    console.log("I am ondelete of todo", todo);
+    setTodos(todos.filter((e)=>{
+      return e!==todo;
+    }));
+    localStorage.setItem("todos", JSON.stringify("todos"));
+  }
   const addTodo =(title,desc)=>{
     console.log("I am adding this todo",title,desc)
-    let sno = todos[todos.length-1].sno +1;
+    let sno;
+    if(todos.length===0){
+      sno = 0;
+    }
+    else{
+     sno = todos[todos.length-1].sno +1;}
     const myTodo={
       sno:sno,
       title:title,
@@ -18,45 +40,40 @@ export default function App() {
     }
     setTodos([...todos, myTodo]);
     console.log(myTodo);
-  }
 
-  const onDelete =(todo)=>{
-    console.log("I am ondelete of todo", todo);
-    setTodos(todos.filter((e)=>{
-      return e!==todo;
-    }));
+         
+    
   }
 
 
-  const [todos, setTodos]=useState([
-    {
-      sno: 1,
-      title:"go to class no.1",
-      desc: "go fast for 1st class"
-    },
-    { 
-      sno: 2,
-      title:"go to class no.2",
-      desc: "go fast for 2st class"
-    },
-    {  
-      sno: 3,
-      title:"go to class no.3",
-      desc: "go fast for 3st class"
-    }
-  ])
+
+  const [todos, setTodos]=useState(
+  initTodo
+  );
+  
+  useEffect(() => {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }, [todos])
 
 
   return (
-    <div className="App">
-    
+    <div>
+    <Router>
       <Header title = "My Todos list"/>
-      <AddTodo addTodo={addTodo}/>
-      <Todos todos={todos} onDelete={onDelete}/>
-      <Footer/>
-    
+        <Switch>
+                <Route exact path='/' render={() =>{
+                  return(<div>
+                    <AddTodo addTodo={addTodo}/>
+                      <Todos todos={todos} onDelete={onDelete}/>
+                    </div>)
+                  }}>
+                </Route>
+                <Route exact path='/about' component={About }/>
+        </Switch>
+                 
+        <Footer/>
+      </Router>
     </div>
-  );
+ );
 }
 
-// export default App;
